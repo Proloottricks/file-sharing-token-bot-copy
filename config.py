@@ -44,7 +44,7 @@ CHANNEL = os.environ.get("CHANNEL", "Sanskari_Links1") # WITHOUR @
 #Shortner (token system) 
 SHORTLINK_URL = os.environ.get("SHORTLINK_URL", "adrinolinks.in")
 SHORTLINK_API = os.environ.get("SHORTLINK_API", "5822cda99a97a9f8f39d9aefd247031fd1513e57")
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 64800)) # Add time in seconds
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', 43200)) # Add time in seconds
 IS_VERIFY = os.environ.get("IS_VERIFY", "True")
 TUT_VID = os.environ.get("TUT_VID", "https://t.me/FirstWatchTutorial/2") # shareus ka tut_vid he 
 
