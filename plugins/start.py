@@ -217,7 +217,7 @@ async def start_command(client: Client, message: Message):
                     [InlineKeyboardButton('How to use the bot', url=TUT_VID)]
                 ]
                 await message.reply(
-"To Use This Bot You Need To Upgrade Token \n" "Click on Click Here button.",\n\nToken Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\nWhat is the token?\n\nThis is an ads token. If you pass 1 ad, you can use the bot for 12 Hour after passing the ad.", reply_markup=InlineKeyboardMarkup(btn), protect_content=False, quote=True)
+"To Use This Bot You Need To Upgrade Token \n""Click on Click Here button.",\n\nToken Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\nWhat is the token?\n\nThis is an ads token. If you pass 1 ad, you can use the bot for 12 Hour after passing the ad.", reply_markup=InlineKeyboardMarkup(btn), protect_content=False, quote=True)
 
 
         
