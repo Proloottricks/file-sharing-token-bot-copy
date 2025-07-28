@@ -38,7 +38,7 @@ BAN = int(os.environ.get("BAN", "1198543450")) #Owner user id - dont chnge
 OWNER = os.environ.get("OWNER", "BURGITY") #Owner username
 OWNER_ID = int(os.environ.get("OWNER_ID", "1809208278")) #Owner user id
 OWNER_USERNAME = os.environ.get('OWNER_USERNAME', 'BURGITY')
-SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "Sanskari_Links69") # WITHOUR @
+SUPPORT_GROUP = os.environ.get("SUPPORT_GROUP", "Sanskari_Links1") # WITHOUR @
 CHANNEL = os.environ.get("CHANNEL", "Sanskari_Links1") # WITHOUR @
 
 #Shortner (token system) 
