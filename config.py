@@ -27,7 +27,7 @@ TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "4"))
 API_HASH = os.environ.get("API_HASH", "f61fa0adcd48b6bec464b6866fbd2822")
 
 #Your db channel Id
-CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1001871025080"))
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002165492019"))
 
 #OWNER ID
 OWNER_ID = int(os.environ.get("OWNER_ID", "6376864232"))
