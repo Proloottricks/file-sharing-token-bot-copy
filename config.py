@@ -53,7 +53,7 @@ JOIN_REQUEST_ENABLE = os.environ.get("JOIN_REQUEST_ENABLED", None)
 
 
 #start message
-START_MSG = os.environ.get("START_MESSAGE", "Hello {first}\n\nI can store private files in Specified Channel and other users can access it from special link.")
+START_MSG = os.environ.get("START_MESSAGE", "Hello {first}\n\n<b>You Need to Join Our Posting Channel</b>\n\n<b>Kindly Please Join Channel</b>\nhttps://t.me/+KgIcsPnXr0NjZTM9")
 try:
     ADMINS=[]
     for x in (os.environ.get("ADMINS", "6376864232").split()):
