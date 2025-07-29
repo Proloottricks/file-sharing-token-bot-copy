@@ -8,9 +8,9 @@ START_PIC = os.environ.get("START_PIC","")
 #Bot token @Botfather
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
 
-LINK = os.environ.get("LINK","https://t.me/Sanskari_Links69")
-CHAT = os.environ.get("CHAT","Sanskari_Links69")
-CHANNEL = os.environ.get("CHANNEL","Sanskari_Links69")
+LINK = os.environ.get("LINK","https://t.me/Sanskari_Links1")
+CHAT = os.environ.get("CHAT","Tharki_Colony")
+CHANNEL = os.environ.get("CHANNEL","Sanskari_Links1")
 
 # Auto delete time in minutes.
 AUTO_DELETE_TIME = int(os.getenv("AUTO_DELETE_TIME", "1200"))
