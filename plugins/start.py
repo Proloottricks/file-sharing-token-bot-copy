@@ -99,12 +99,12 @@ async def start_command(client: Client, message: Message):
             except:
                 pass
 
-        verify_status = await get_verify_status(id)
-        if verify_status['is_verified'] and VERIFY_EXPIRE < (time.time() - verify_status['verified_time']):
-            await update_verify_status(id, is_verified=False)
+        btn = [
+                [InlineKeyboardButton("👉 Click here for Video Links", url="https://t.me/+eFlQ5EUadj0xM2Ex")]
+            ]
 
-        if "verify_" in message.text:
-            _, token = message.text.split("_", 1)
+            await message.reply(
+                "✅ Your token successfully verified and valid for: 18 Hour\n\n<b>☺️ Now Click on Video Link to Get Video</b>",
             if verify_status['verify_token'] != token:
                 return await message.reply("Your token is invalid or Expired. Try again by clicking /start")
             await update_verify_status(id, is_verified=True, verified_time=time.time())
