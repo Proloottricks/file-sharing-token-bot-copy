@@ -100,7 +100,7 @@ async def start_command(client: Client, message: Message):
                 pass
 
         btn = [
-                [InlineKeyboardButton("👉 Click here for Video Links", url="https://t.me/+eFlQ5EUadj0xM2Ex")]
+                [InlineKeyboardButton("👉 Click here for Video Links", url="https://t.me/+NzWCXxbuqOE4NDRl")]
             ]
 
             await message.reply(
