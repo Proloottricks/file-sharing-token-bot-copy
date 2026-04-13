@@ -41,30 +41,25 @@ async def add_delete_task(chat_id, message_id, delete_at):
 async def delete_notification(client, chat_id, notification_id, delay):
     await asyncio.sleep(delay)
     try:
-        # Delete the notification message
         await client.delete_messages(chat_id=chat_id, message_ids=notification_id)
     except Exception as e:
         print(f"Error deleting notification {notification_id} in chat {chat_id}: {e}")
-        
+
 async def schedule_auto_delete(client, chat_id, message_id, delay):
     delete_at = datetime.now() + timedelta(seconds=int(delay))
     await add_delete_task(chat_id, message_id, delete_at)
-    
-    # Run deletion in the background to prevent blocking
+
     async def delete_message():
         await asyncio.sleep(int(delay))
         try:
-            # Delete the original message
             await client.delete_messages(chat_id=chat_id, message_ids=message_id)
-            phdlust_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})  # Remove from DB
-            
-            # Send a notification about the deletion
+            phdlust_tasks.delete_one({"chat_id": chat_id, "message_id": message_id})
+
             notification_text = DELETE_INFORM
             notification_msg = await client.send_message(chat_id, notification_text)
-            
-            # Schedule deletion of the notification after 60 seconds
+
             asyncio.create_task(delete_notification(client, chat_id, notification_msg.id, 40))
-        
+
         except Exception as e:
             print(f"Error deleting message {message_id} in chat {chat_id}: {e}")
 
@@ -74,7 +69,6 @@ async def schedule_auto_delete(client, chat_id, message_id, delay):
 async def delete_notification_after_delay(client, chat_id, message_id, delay):
     await asyncio.sleep(delay)
     try:
-        # Delete the notification message
         await client.delete_messages(chat_id=chat_id, message_ids=message_id)
     except Exception as e:
         print(f"Error deleting notification {message_id} in chat {chat_id}: {e}")
@@ -83,15 +77,10 @@ async def delete_notification_after_delay(client, chat_id, message_id, delay):
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
 async def start_command(client: Client, message: Message):
     id = message.from_user.id
-    UBAN = BAN  # Fetch the owner's ID from config
-    
-    # Schedule the initial message for deletion after 10 minutes
-    #await schedule_auto_delete(client, message.chat.id, message.id, delay=600)
+    UBAN = BAN  
 
-    # Check if the user is the owner
     if id == UBAN:
-        sent_message = await message.reply("You are the U-BAN! Additional actions can be added here.")
-
+        await message.reply("You are the U-BAN! Additional actions can be added here.")
     else:
         if not await present_user(id):
             try:
@@ -99,18 +88,26 @@ async def start_command(client: Client, message: Message):
             except:
                 pass
 
-        btn = [
+        verify_status = await get_verify_status(id)
+        if verify_status['is_verified'] and VERIFY_EXPIRE < (time.time() - verify_status['verified_time']):
+            await update_verify_status(id, is_verified=False)
+
+        if "verify_" in message.text:
+            _, token = message.text.split("_", 1)
+            if verify_status['verify_token'] != token:
+                return await message.reply("Your token is invalid or Expired. Try again by clicking /start")
+            await update_verify_status(id, is_verified=True, verified_time=time.time())
+
+            btn = [
                 [InlineKeyboardButton("👉 Click here for Video Links", url="https://t.me/+NzWCXxbuqOE4NDRl")]
             ]
 
             await message.reply(
                 "✅ Your token successfully verified and valid for: 18 Hour\n\n<b>☺️ Now Click on Video Link to Get Video</b>",
-            if verify_status['verify_token'] != token:
-                return await message.reply("Your token is invalid or Expired. Try again by clicking /start")
-            await update_verify_status(id, is_verified=True, verified_time=time.time())
-            if verify_status["link"] == "":
-                reply_markup = None
-            await message.reply(f"Your token successfully verified and valid for: 18 Hour", reply_markup=reply_markup, protect_content=False, quote=True)
+                reply_markup=InlineKeyboardMarkup(btn),
+                protect_content=False,
+                quote=True
+            )
 
         elif len(message.text) > 7 and verify_status['is_verified']:
             try:
@@ -147,7 +144,7 @@ async def start_command(client: Client, message: Message):
                 await message.reply_text("Something went wrong..!")
                 return
             await temp_msg.delete()
-            
+
             phdlusts = []
             messages = await get_messages(client, ids)
             for msg in messages:
@@ -160,22 +157,19 @@ async def start_command(client: Client, message: Message):
                     reply_markup = msg.reply_markup
                 else:
                     reply_markup = None
-                
+
                 try:
                     messages = await get_messages(client, ids)
                     phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup , protect_content=PROTECT_CONTENT)
                     phdlusts.append(phdlust)
                     if AUTO_DELETE == True:
-                        #await message.reply_text(f"The message will be automatically deleted in {delete_after} seconds.")
                         asyncio.create_task(schedule_auto_delete(client, phdlust.chat.id, phdlust.id, delay=DELETE_AFTER))
                     await asyncio.sleep(0.2)      
-                    #asyncio.sleep(0.2)
                 except FloodWait as e:
                     await asyncio.sleep(e.x)
                     phdlust = await msg.copy(chat_id=message.from_user.id, caption=caption, reply_markup=reply_markup , protect_content=PROTECT_CONTENT)
                     phdlusts.append(phdlust)     
 
-            # Notify user to get file again if messages are auto-deleted
             if GET_AGAIN == True:
                 get_file_markup = InlineKeyboardMarkup([
                     [InlineKeyboardButton("GET FILE AGAIN", url=f"https://t.me/{client.username}?start={message.text.split()[1]}")]
@@ -185,7 +179,7 @@ async def start_command(client: Client, message: Message):
             if AUTO_DELETE == True:
                 delete_notification = await message.reply(NOTIFICATION)
                 asyncio.create_task(delete_notification_after_delay(client, delete_notification.chat.id, delete_notification.id, delay=NOTIFICATION_TIME))
-                
+
         elif verify_status['is_verified']:
             reply_markup = InlineKeyboardMarkup(
                 [[InlineKeyboardButton("About Me", callback_data="about"),
@@ -207,8 +201,6 @@ async def start_command(client: Client, message: Message):
         else:
             verify_status = await get_verify_status(id)
             if IS_VERIFY and not verify_status['is_verified']:
-                short_url = f"adrinolinks.in"
-                # TUT_VID = f"https://t.me/ultroid_official/18"
                 token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
                 await update_verify_status(id, verify_token=token, link="")
                 link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API,f'https://telegram.dog/{client.username}?start=verify_{token}')
@@ -217,67 +209,51 @@ async def start_command(client: Client, message: Message):
                     [InlineKeyboardButton('How to use the bot', url=TUT_VID)]
                 ]
                 await message.reply(
-    "To Use This Bot You Need To Upgrade Token.\n"
-    "Click on Click Here button.\n\n"
-    f"Token Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\n"
-    "What is the token?\n\n"
-    "This is an ads token. If you pass 1 ad, you can use the bot for 12 hours after passing the ad.",
-    reply_markup=InlineKeyboardMarkup(btn),
-    protect_content=False,
-    quote=True
-)
+                    f"Your Ads token is expired, refresh your token and try again.\n\nToken Timeout: {get_exp_time(VERIFY_EXPIRE)}\n\nWhat is the token?\n\nThis is an ads token. If you pass 1 ad, you can use the bot for 12 Hour after passing the ad.",
+                    reply_markup=InlineKeyboardMarkup(btn),
+                    protect_content=False,
+                    quote=True
+                )
 
-
-        
-#=====================================================================================##
 
 WAIT_MSG = """"<b>Processing ...</b>"""
-
 REPLY_ERROR = """<code>Use this command as a replay to any telegram message with out any spaces.</code>"""
 
-#=====================================================================================##
 
-    
-    
 @Bot.on_message(filters.command('start') & filters.private)
 async def not_joined(client: Client, message: Message):
     buttons = [
         [
-            InlineKeyboardButton(
-                "Join Channel",
-                url = client.invitelink)
+            InlineKeyboardButton("Join Channel", url=client.invitelink)
         ]
     ]
     try:
         buttons.append(
-            [
-                InlineKeyboardButton(
-                    text = 'Try Again',
-                    url = f"https://t.me/{client.username}?start={message.command[1]}"
-                )
-            ]
+            [InlineKeyboardButton('Try Again', url=f"https://t.me/{client.username}?start={message.command[1]}")]
         )
     except IndexError:
         pass
 
     await message.reply(
-        text = FORCE_MSG.format(
-                first = message.from_user.first_name,
-                last = message.from_user.last_name,
-                username = None if not message.from_user.username else '@' + message.from_user.username,
-                mention = message.from_user.mention,
-                id = message.from_user.id
-            ),
-        reply_markup = InlineKeyboardMarkup(buttons),
-        quote = True,
-        disable_web_page_preview = True
+        text=FORCE_MSG.format(
+            first=message.from_user.first_name,
+            last=message.from_user.last_name,
+            username=None if not message.from_user.username else '@' + message.from_user.username,
+            mention=message.from_user.mention,
+            id=message.from_user.id
+        ),
+        reply_markup=InlineKeyboardMarkup(buttons),
+        quote=True,
+        disable_web_page_preview=True
     )
+
 
 @Bot.on_message(filters.command('users') & filters.private & filters.user(ADMINS))
 async def get_users(client: Bot, message: Message):
     msg = await client.send_message(chat_id=message.chat.id, text=WAIT_MSG)
     users = await full_userbase()
     await msg.edit(f"{len(users)} users are using this bot")
+
 
 @Bot.on_message(filters.private & filters.command('broadcast') & filters.user(ADMINS))
 async def send_text(client: Bot, message: Message):
@@ -289,7 +265,7 @@ async def send_text(client: Bot, message: Message):
         blocked = 0
         deleted = 0
         unsuccessful = 0
-        
+
         pls_wait = await message.reply("<i>Broadcasting Message.. This will Take Some Time</i>")
         for chat_id in query:
             try:
@@ -309,7 +285,7 @@ async def send_text(client: Bot, message: Message):
                 unsuccessful += 1
                 pass
             total += 1
-        
+
         status = f"""<b><u>Broadcast Completed</u>
 
 Total Users: <code>{total}</code>
@@ -317,7 +293,7 @@ Successful: <code>{successful}</code>
 Blocked Users: <code>{blocked}</code>
 Deleted Accounts: <code>{deleted}</code>
 Unsuccessful: <code>{unsuccessful}</code></b>"""
-        
+
         return await pls_wait.edit(status)
 
     else:
